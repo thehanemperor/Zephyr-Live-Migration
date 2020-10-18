@@ -5,34 +5,38 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@EnableJpaRepositories(basePackages = {"com.example.demo.repository"},entityManagerFactoryRef = "entityManagerFactoryBean", transactionManagerRef = "transactionManager")
+@EnableTransactionManagement
 public class HibernateConfig {
 
     @Autowired
     private JpaProperties jpaProperties;
 
-    @Autowired
-    private DataSource dataSource;
+//    @Autowired
+//    private DataSource dataSource;
+
     @Bean
     JpaVendorAdapter jpaVendorAdapter(){
         return new HibernateJpaVendorAdapter();
@@ -40,7 +44,7 @@ public class HibernateConfig {
 
 
     @Bean
-    LocalContainerEntityManagerFactoryBean entityManagerFactory(
+    LocalContainerEntityManagerFactoryBean entityManagerFactoryBean(
             DataSource dataSource,
             MultiTenantConnectionProvider multiTenantConnectionProvider,
             CurrentTenantIdentifierResolver currentTenantIdentifierResolverImpl
@@ -66,6 +70,17 @@ public class HibernateConfig {
         em.setJpaPropertyMap(jpaPropertiesMap);
         return em;
     }
+
+
+
+    @Bean
+    public PlatformTransactionManager transactionManager(
+            @Qualifier("entityManagerFactoryBean") EntityManagerFactory emf) {
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(emf);
+        return transactionManager;
+    }
+
 
 
 

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -32,5 +33,13 @@ public class CityService {
 
     public void delete(String name){
         cityRepository.deleteByName(name);
+    }
+
+    // examples for a transactional operation
+    @Transactional
+    public void updateCityNameTransaction(Long id,String newName) {
+        City city = cityRepository.getOne(id);
+
+        city.setName(newName);
     }
 }

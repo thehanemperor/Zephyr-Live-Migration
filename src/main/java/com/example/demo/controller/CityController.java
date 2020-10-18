@@ -35,6 +35,15 @@ public class CityController{
         return new ResponseEntity<>(name, HttpStatus.OK);
     }
 
+//    Example of transactions
+
+    @RequestMapping(path = "/id/updateCityName/{id}/{newName}",method = RequestMethod.POST)
+    public ResponseEntity<?> update(@PathVariable("id")Long id, @PathVariable("newName")String newName) throws  SQLException{
+        System.out.println("updating transaction");
+        cityService.updateCityNameTransaction(id,newName);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     public ResponseEntity<City> get(@PathVariable(value = "name") String name) {
         City city = cityService.getByName(name);
